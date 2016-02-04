@@ -1,0 +1,23 @@
+function vis_joints(filename)
+
+    load(filename);
+
+    str = '-mirror';
+    
+    if (~isempty(s.filename,str))
+        new_filename = 
+    else
+        new_filename = 
+        
+        
+    
+    figure;
+    imshow(im); hold;
+    for i = 1:14
+        if (joints(i,3) == 1)
+           plot(joints(i,1),joints(i,2),'*');
+           t = text(joints(i,1),joints(i,2),num2str(i));
+           t.Color = [1,0,1];
+        end
+    end
+end
