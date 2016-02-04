@@ -2,11 +2,14 @@ clc;
 close all;
 clear all;
 
-%constants
+%options
 nJoints = 14;
 nBorders = 4;
 start_from = 20000;
-scale = 1;
+
+scale = 0.3;
+use_bbox = 1;
+scale_bbox = 0.4;
 
 %           lsp_id x mpii_id
 ids_match = [1,0;
@@ -35,7 +38,7 @@ cnt = 1;
 
 %mirror images after computed
 for flip=1:2
-    for i=1:10
+    parfor i=1:10
         
         %show progress in the screen
         clc
@@ -48,6 +51,9 @@ for flip=1:2
         
         %get currImage
         currImg = imread(strcat('images/',name));
+        
+        % scale current image
+        currImg_scale = imresize(currImg,scale); 
         
         %dataset
         s.dataset = 'mpii';
@@ -71,6 +77,9 @@ for flip=1:2
             
                 temp3DImg = zeros(size(currImg,1),size(currImg,2),nJoints+nBorders);
                 temp3DDT  = zeros(size(currImg,1),size(currImg,2),nJoints+nBorders);
+                
+                temp3DImg_scale = imresize(temp3DImg,scale);
+                temp3DDT_scale  = imresize(temp3DDT,scale);
                 
                 %initialize joints
                 s.joints = zeros(nJoints+nBorders,3);              
@@ -113,21 +122,20 @@ for flip=1:2
                            if (flip == 2)
                               temp3DImg(:,:,j) = fliplr(temp3DImg(:,:,j)); 
                            end
-                            
-                           %scale
                            
-                           
-                           %add joints
-                           [row,col] = find(temp3DImg(:,:,j)==1);
+                           temp3DImg_scale(:,:,j) = imresize(temp3DImg(:,:,j),scale,'bilinear');
 
-                           s.joints(j,1) = col;
-                           s.joints(j,2) = row;
+                           %add joints
+                           [row,col] = find(temp3DImg_scale(:,:,j)>0);
+
+                           s.joints(j,1) = col(1);
+                           s.joints(j,2) = row(1);
 
                            %compute distance transform
-                           dtim = bwdist(temp3DImg(:,:,j));
+                           %dtim = bwdist(temp3DImg_scale(:,:,j));
 
                            %store in the 'cube'
-                           temp3DDT(:,:,j) = dtim;
+                           %temp3DDT_scale(:,:,j) = dtim;
                        else
                           is_joint = 0;
                        end
@@ -138,39 +146,85 @@ for flip=1:2
                    
                    %if there is no joint, fill the matrix with -1
                    if (is_joint == 0)
-                       temp3DDT(:,:,j) = temp3DDT(:,:,j) -1;
+                       temp3DDT_scale(:,:,j) = temp3DDT_scale(:,:,j) -1;
                        s.joints(j,3) = 0;
                    end
                 end
+                
+                tjoints = s.joints(find(s.joints(:,3) == 1),:);
+                
+                xmax = max(tjoints(:,1));
+                ymax = max(tjoints(:,2));
+                xmin = min(tjoints(:,1));
+                ymin = min(tjoints(:,2));
+                
+                ww = xmax-xmin;
+                hh = ymax-ymin;
+                
+                xxmin = xmin-ww*scale_bbox;
+                if (xxmin <= 0) xxmin = 1; end
+                yymin = ymin-hh*scale_bbox;
+                if (yymin <= 0) yymin = 1; end
+                
+                xxmax = xmax+ww*scale_bbox;
+                if (xxmax > size(currImg_scale,2)) xxmax = size(currImg_scale,2); end
+                
+                yymax = ymax+hh*scale_bbox;
+                if (yymax > size(currImg_scale,1)) yymax = size(currImg_scale,1); end
+                
+                www = xxmax - xxmin;
+                hhh = yymax - yymin;
+                
+                s.bounding_box = [xxmin, yymin; www, hhh];
+                
+                
+                size_h = size(round(yymin):round(yymax),2);
+                size_w = size(round(xxmin):round(xxmax),2);
+                
+                temp3DDT_bbox = zeros(size_h,size_w,nJoints+nBorders);
+                
+                for jj=1:nJoints
+                    if (s.joints(jj,3) == 1)
+                        %compute distance transform
+                        dtim = bwdist(temp3DImg_scale(round(yymin):round(yymax), round(xxmin):round(xxmax),jj));
 
+                        %store in the 'cube'
+                        temp3DDT_bbox(:,:,jj) = dtim;
+                    else
+                        temp3DDT_bbox(:,:,jj) = temp3DDT_bbox(:,:,jj) - 1;
+                    end
+                end
+                
                 %add borders
-                borders = [1,               1               ;
-                           1,               size(currImg,2) ;
-                           size(currImg,1), size(currImg,2) ;
-                           size(currImg,1), 1              ];
+                borders = [1,   1   ;
+                           1,   size_w ;
+                           size_h, size_w ;
+                           size_h, 1  ];
 
                 %add borders to the image
                 for k=1:size(borders,1)
-                    tempJoint = zeros(size(currImg,1),size(currImg,2));
+                    tempJoint = zeros(size_h,size_w);
                     tempJoint(borders(k,1),borders(k,2)) = 1;
 
                     %compute distance transform
-                    temp3DDT(:,:,14+k) = bwdist(tempJoint);
+                    temp3DDT_bbox(:,:,nJoints+k) = bwdist(tempJoint);
 
                     %add joints
-                    s.joints(14+k,1) = borders(k,2);
-                    s.joints(14+k,2) = borders(k,1);
+                    s.joints(nJoints+k,1) = borders(k,2);
+                    s.joints(nJoints+k,2) = borders(k,1);
 
                     %set as a visible joint
-                    s.joints(14+k,3) = 1;
+                    s.joints(nJoints+k,3) = 1;
                 end
 
                 %imgsJoints{cnt} = temp3DImg;
                 %imgsDT{cnt} = temp3DDT;
 
                 %s.joints = temp3DImg;
-                s.dist_transf = temp3DDT;
-
+                s.scale = scale;
+                s.dist_transf = temp3DDT_bbox;
+                
+                
                 save(strcat('save/m',num2str(start_from+cnt),'.mat'),'s');
 
                 cnt = cnt + 1;
