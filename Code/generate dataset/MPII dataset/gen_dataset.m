@@ -36,7 +36,7 @@ N = size(RELEASE.annolist,2);
 %init cnt
 cnt = 1;
 
-N = 10;
+%N = 10;
 tic
 %mirror images after computed
 for flip=1:2
