@@ -41,8 +41,8 @@ for flip=1:2
     parfor i=1:10
         
         %show progress in the screen
-        clc
-        cnt
+        %clc
+        i
         
         %create structe to be saved
         s = struct;
@@ -227,7 +227,7 @@ for flip=1:2
                 
                 save(strcat('save/m',num2str(start_from+cnt),'.mat'),'s');
 
-                cnt = cnt + 1;
+                %cnt = cnt + 1;
             end
         end
     end

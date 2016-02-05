@@ -9,7 +9,7 @@ start_from = 20000;
 
 scale = 0.3;
 use_bbox = 1;
-scale_bbox = 0.4;
+scale_bbox = 0.35;
 
 %           lsp_id x mpii_id
 ids_match = [1,0;
@@ -36,13 +36,19 @@ N = size(RELEASE.annolist,2);
 %init cnt
 cnt = 1;
 
+N = 10;
+tic
 %mirror images after computed
 for flip=1:2
-    parfor i=1:10
+    for i=1:N
         
         %show progress in the screen
         clc
-        cnt
+        if (flip == 1)
+            disp(strcat(num2str((i/(2*N))*100),'%'));
+        else
+            disp(strcat(num2str(((N+i)/(2*N))*100),'%'));
+        end
         
         %create structe to be saved
         s = struct;
@@ -71,7 +77,7 @@ for flip=1:2
         %for each person in the image
         n_person = size(RELEASE.annolist(i).annorect,2);
         for p=1:n_person
-        
+            
             %check if field exists
             if (isfield(RELEASE.annolist(i).annorect(1,p), 'annopoints'))
             
@@ -232,7 +238,7 @@ for flip=1:2
         end
     end
 end
-
+toc
 %im = imread('cameraman.tif');
 %bw = edge(im);
 %d = bwdist(bw);
