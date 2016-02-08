@@ -1,7 +1,13 @@
 # ignore lsp files
 /Code/generate \dataset/lsp_dataset/images
+/Code/generate \dataset/lsp_dataset/visualized
 /Code/generate \dataset/lsp_dataset/save
 
+#ignore lsp ex files
+/Code/generate \dataset/lsp_dataset_ex/images
+/Code/generate \dataset/lsp_dataset_ex/save
+/Code/generate \dataset/lsp_dataset_ex/save1
+
 # ignore MPII files
-/Code/generate \dataset/MPII \dataset/images
-/Code/generate \dataset/MPII \dataset/save
+/Code/generate \dataset/mpii_dataset/images
+/Code/generate \dataset/mpii_dataset/save

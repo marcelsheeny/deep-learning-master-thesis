@@ -19,7 +19,19 @@ function visualize_data(filename)
     end
     
     figure;
-    imshow(imresize(im); hold;
+    if (isfield(s,'scale'))
+        imshow(imresize(im,s.scale)); hold;
+    else
+        imshow(im); hold;
+    end
+    
+    x = s.bounding_box(1,1);
+    y = s.bounding_box(1,2);
+    w = s.bounding_box(2,1);
+    h = s.bounding_box(2,2);
+    
+    rectangle('Position', [x, y, w, h]);
+    
     for i = 1:14
         if (s.joints(i,3) == 1)
            h = plot(s.joints(i,1),s.joints(i,2),'.');
@@ -31,7 +43,7 @@ function visualize_data(filename)
     end
     
     figure;
-    for i=1:18
+    for i=1:18 
         subplot(3,6,i)
         imshow(s.dist_transf(:,:,i),[]);
     end

@@ -1,49 +1,49 @@
-Leeds Sports Pose Extended Training Dataset
+Leeds Sports Pose Dataset
 Sam Johnson and Mark Everingham
-http://www.comp.leeds.ac.uk/mat4saj/lspet.html
+http://www.comp.leeds.ac.uk/mat4saj/lsp.html
 
-This is a set of 10,000 images gathered from Flickr searches for 
-the tags 'parkour', 'gymnastics', and 'athletics'. Each image has 
-a corresponding annotation gathered from Amazon Mechanical Turk.
-The images have been scaled such that the annotated person is 
-roughly 150 pixels in length.
+This dataset contains 2000 images of mostly sports people
+gathered from Flickr. The images have been scaled such that the
+most prominent person is roughly 150 pixels in length. The file
+joints.mat contains 14 joint locations for each image along with
+a binary value specifying joint visibility.
 
-The archive contains two top-level files and one folder:
-README.txt - this document
-joints.mat - a MATLAB format matrix 'joints' consisting of 14
-             joint locations and visibility flags. Joints are 
-             labelled in the following order:
-				Right ankle
-				Right knee
-				Right hip
-				Left hip
-				Left knee
-				Left ankle
-				Right wrist
-				Right elbow
-				Right shoulder
-				Left shoulder
-				Left elbow
-				Left wrist
-				Neck
-				Head top
-images/ - 10,000 images
+The ordering of the joints is as follows:
 
-There is a second archive:
-http://www.comp.leeds.ac.uk/mat4saj/lspet_dataset_visualized.zip
-containing the 10,000 images above with rendered poses.
+Right ankle
+Right knee
+Right hip
+Left hip
+Left knee
+Left ankle
+Right wrist
+Right elbow
+Right shoulder
+Left shoulder
+Left elbow
+Left wrist
+Neck
+Head top
+
+This archive contains two folders:
+images - containing the original images
+visualized - containing the images with poses visualized
+
 
 If you use this dataset please cite
 
 Sam Johnson and Mark Everingham
-"Learning Effective Human Pose Estimation from Inaccurate Annotation"
-In proceedings of Computer Vision and Pattern Recognition (CVPR) 2011
+"Clustered Pose and Nonlinear Appearance Models for Human Pose Estimation"
+In proceedings of the 21st British Machine Vision Conference (BMVC2010)
 
-@inproceedings{Johnson11,
-   title = {Learning Effective Human Pose Estimation from Inaccurate Annotation},
+@inproceedings{Johnson10,
+   title = {Clustered Pose and Nonlinear Appearance Models for Human Pose Estimation},
    author = {Johnson, Sam and Everingham, Mark},
-   year = {2011},
-   booktitle = {Proceedings of Computer Vision and Pattern Recognition (CVPR) 2011}
+   year = {2010},
+   booktitle = {Proceedings of the British Machine Vision Conference},
+   note = {doi:10.5244/C.24.12}
 }
 
+For further information on this dataset including our results and protocols please visit: 
+http://www.comp.leeds.ac.uk/mat4saj/lsp.html
 E-mail: s.a.johnson04@leeds.ac.uk

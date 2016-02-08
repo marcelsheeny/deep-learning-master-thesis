@@ -66,13 +66,13 @@ for flip=1:2
         is_joint = 1;
         
         for j = 1:nJoints
-           if (joints(3,j,i) == 0)
+           if (joints(j,3,i) == 1)
                %set as a visible joint
                s.joints(j,3) = 1;
                
                %get row and column
-               r = round(joints(2,j,i));
-               c = round(joints(1,j,i));
+               r = round(joints(j,2,i));
+               c = round(joints(j,1,i));
                
                %avoid problems with borders
                if (r > size(currImg,1)) r = size(currImg,1); end
@@ -174,7 +174,7 @@ for flip=1:2
                    size_h, size_w ;
                    size_h, 1  ];
 
-       %add borders to the image
+        %add borders to the image
         for k=1:size(borders,1)
             tempJoint = zeros(size_h,size_w);
             tempJoint(borders(k,1),borders(k,2)) = 1;
@@ -201,7 +201,7 @@ for flip=1:2
         s.img_train = 1;
         s.act = [];
         
-        save(strcat('save/l',num2str(cnt),'.mat'),'s');
+        save(strcat('save1/le',num2str(cnt),'.mat'),'s');
         
         cnt = cnt + 1;
     end
