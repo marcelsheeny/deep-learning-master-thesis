@@ -3,8 +3,11 @@ close all;
 clear all;
 
 %constants
-nJoints = 14;
-nBorders = 4;
+nJoints = 14;             %number of joints
+nBorders = 4;             %number of borders
+start_from = 0;           %a number to define were to start the save files
+scale = 1;                %changing the scale from the original image to become faster
+scale_bbox = 0.35;        %set how bigger this bounding box will be
 
 %load joints
 load('joints.mat')

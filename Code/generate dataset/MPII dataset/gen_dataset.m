@@ -3,29 +3,28 @@ close all;
 clear all;
 
 %options
-nJoints = 14;
-nBorders = 4;
-start_from = 20000;
+nJoints = 14;             %number of joints
+nBorders = 4;             %number of borders
+start_from = 20000;       %a number to define were to start the save files
+scale = 0.3;              %changing the scale from the original image to become faster
+scale_bbox = 0.35;        %set how bigger this bounding box will be
 
-scale = 0.3;
-use_bbox = 1;
-scale_bbox = 0.35;
-
+%setting correspondent ids in ths lsp and mpii datasets
 %           lsp_id x mpii_id
-ids_match = [1,0;
-             2,1;
-             3,2;
-             4,3;
-             5,4;
-             6,5;
-             7,10;
-             8,11;
-             9,12;
-             10,13;
-             11,14;
-             12,15;
-             13,8;
-             14,9];
+ids_match = [1,      0;
+             2,      1;
+             3,      2;
+             4,      3;
+             5,      4;
+             6,      5;
+             7,      10;
+             8,      11;
+             9,      12;
+             10,     13;
+             11,     14;
+             12,     15;
+             13,     8;
+             14,     9];
          
 %load dataset annotation
 load('mpii_human_pose_v1_u12_1.mat');
@@ -36,10 +35,10 @@ N = size(RELEASE.annolist,2);
 %init cnt
 cnt = 1;
 
-%N = 10;
 tic
-%mirror images after computed
+%mirror images after computed to have a larger dataset
 for flip=1:2
+    %for all images
     for i=1:N
         
         %show progress in the screen
@@ -53,7 +52,16 @@ for flip=1:2
         %create structe to be saved
         s = struct;
         
+        %image name
         name = RELEASE.annolist(i).image.name;
+        
+        %check if file exists
+        if (~exist(strcat('images/',name),'file')) 
+           missing_files{cnt_miss} = strcat('images/',name);
+           cnt_miss = cnt_miss + 1;
+           disp(strcat('file:','images/',name,'does not exist!'));
+           continue;
+        end
         
         %get currImage
         currImg = imread(strcat('images/',name));
@@ -79,7 +87,8 @@ for flip=1:2
         for p=1:n_person
             
             %check if field exists
-            if (isfield(RELEASE.annolist(i).annorect(1,p), 'annopoints'))
+            if (isfield(RELEASE.annolist(i).annorect(1,p), 'annopoints') && ...
+                    ~isempty(RELEASE.annolist(i).annorect(1,p).annopoints))
             
                 temp3DImg = zeros(size(currImg,1),size(currImg,2),nJoints+nBorders);
                 temp3DDT  = zeros(size(currImg,1),size(currImg,2),nJoints+nBorders);
@@ -184,15 +193,31 @@ for flip=1:2
                 s.bounding_box = [xxmin, yymin; www, hhh];
                 
                 
-                size_h = size(round(yymin):round(yymax),2);
-                size_w = size(round(xxmin):round(xxmax),2);
+                size_h = size(ceil(yymin):ceil(yymax),2);
+                size_w = size(ceil(xxmin):ceil(xxmax),2);
                 
                 temp3DDT_bbox = zeros(size_h,size_w,nJoints+nBorders);
                 
                 for jj=1:nJoints
                     if (s.joints(jj,3) == 1)
+                        
+                        xxmax = ceil(xxmax);
+                        xxmin = ceil(xxmin);
+                        yymax = ceil(yymax);
+                        yymin = ceil(yymin);
+                        
+                        %avoid problems with borders
+                        %if (xxmax > xxmin+size_w) xxmax = xxmin+size_w; end
+                        %if (yymax > size_h) yymax = yymin+size_h; end
+                        %if (xxmin <= 0) 
+                        %    xxmin = 1; 
+                        %end
+                        %if (yymin <= 0)
+                        %    yymin = 1; 
+                       % end
+                        
                         %compute distance transform
-                        dtim = bwdist(temp3DImg_scale(round(yymin):round(yymax), round(xxmin):round(xxmax),jj));
+                        dtim = bwdist(temp3DImg_scale(yymin:yymax, xxmin:xxmax,jj));
 
                         %store in the 'cube'
                         temp3DDT_bbox(:,:,jj) = dtim;
@@ -229,7 +254,8 @@ for flip=1:2
                 %s.joints = temp3DImg;
                 s.scale = scale;
                 s.dist_transf = temp3DDT_bbox;
-                
+                s.img_train = RELEASE.img_train(i);
+                s.act = RELEASE.act(i);
                 
                 save(strcat('save/m',num2str(start_from+cnt),'.mat'),'s');
 
